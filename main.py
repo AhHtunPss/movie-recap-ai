@@ -1,7 +1,6 @@
-celeryception os
+import os
 import uuid
-from pathlib import Path
-
+import Path
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import lery
 from celery import Celery
