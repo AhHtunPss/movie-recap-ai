@@ -1,8 +1,9 @@
-import os
+celeryception os
 import uuid
 from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.responses import lery
 from celery import Celery
 from celery.result import AsyncResult
 
@@ -21,13 +22,17 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 MAX_SIZE = 100 * 1024 * 1024  # 100 MB
 
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def home():
-    return {
-        "app": "Movie Recap AI Backend",
-        "status": "running",
-        "message": "Backend is ready"
-    }
+    html_path = Path(__file__).parent / "index.html"
+
+    if not html_path.exists():
+        raise HTTPException(
+            status_code=500,
+            detail="index.html file not found"
+        )
+
+    return html_path.read_text(encoding="utf-8")
 
 
 @app.get("/health")
