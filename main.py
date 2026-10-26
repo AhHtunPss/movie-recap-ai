@@ -3,7 +3,7 @@ import uuid
 from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.responses import lery
+from fastapi.responses import HTMLResponse
 from celery import Celery
 from celery.result import AsyncResult
 
