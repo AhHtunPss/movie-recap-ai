@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101322">
+  <title>Movie Recap AI Studio</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b0e19;--panel:#14192a;--panel2:#1b2237;--line:#2a3450;--text:#f3f5ff;--muted:#a8b1ca;--accent:#8b7cff;--accent2:#4dd6b5;--danger:#ff7b8b}
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(ellipse at top,#1b2040 0,#0b0e19 55%);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans Myanmar",sans-serif;min-height:100vh}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .shell{max-width:1180px;margin:auto;padding:20px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+    .brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#8b7cff,#4dd6b5);color:#080b16;font-weight:900;font-size:20px}
+    h1{font-size:clamp(22px,4vw,32px);margin:0}.sub{color:var(--muted);font-size:13px;margin-top:4px}
+    .pill{border:1px solid var(--line);border-radius:999px;padding:8px 12px;color:var(--muted);font-size:12px}
+    .hero{background:linear-gradient(120deg,rgba(139,124,255,.2),rgba(77,214,181,.08));border:1px solid var(--line);border-radius:24px;padding:24px;margin-bottom:18px}
+    .hero h2{font-size:clamp(23px,4vw,36px);margin:0 0 10px}.hero p{color:var(--muted);max-width:700px;line-height:1.8;margin:0 0 18px}
+    .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}.span8{grid-column:span 8}.span4{grid-column:span 4}.span12{grid-column:span 12}
+    .panel{background:rgba(20,25,42,.94);border:1px solid var(--line);border-radius:20px;padding:18px;min-width:0}.panel h3{margin:0 0 14px;font-size:17px}
+    .field{display:grid;gap:7px;margin-bottom:14px}.field label{font-size:13px;color:var(--muted)}
+    input[type=text],input[type=url],select,textarea{width:100%;background:#0e1322;border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--text);outline:none}
+    textarea{min-height:145px;resize:vertical;line-height:1.65}
+    input[type=file]{width:100%;padding:12px;background:#0e1322;border:1px dashed #475374;border-radius:12px;color:var(--muted)}
+    .btn{border:0;border-radius:12px;padding:12px 16px;background:linear-gradient(135deg,#8b7cff,#6b5df0);color:white;font-weight:750}
+    .btn.secondary{background:#222b43;border:1px solid var(--line)}.btn.green{background:linear-gradient(135deg,#39c9a8,#229e83);color:#061610}
+    .btn:disabled{opacity:.5;cursor:not-allowed}.actions{display:flex;gap:10px;flex-wrap:wrap}
+    .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
+    .tile{background:rgba(20,25,42,.88);border:1px solid var(--line);border-radius:16px;padding:16px}.tile strong{display:block;font-size:20px;margin-bottom:5px}.tile span{color:var(--muted);font-size:12px}
+    .toolnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.toolnav button{border:1px solid var(--line);border-radius:999px;padding:9px 13px;background:#14192a;color:var(--muted)}.toolnav button.active{background:#302b5b;border-color:#8b7cff;color:white}
+    .notice{border:1px solid var(--line);background:#101627;padding:12px;border-radius:12px;color:var(--muted);font-size:13px;line-height:1.6}
+    .status{padding:10px 12px;border-radius:12px;background:#101627;border:1px solid var(--line);font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:12px}
+    .status.ok{border-color:#2b7d68;color:#8ef0d3}.status.bad{border-color:#8d4050;color:#ffb5bf}
+    .small{font-size:12px;color:var(--muted);line-height:1.7}.hidden{display:none!important}
+    .output{white-space:pre-wrap;overflow-wrap:anywhere;background:#0e1322;border:1px solid var(--line);border-radius:12px;padding:14px;min-height:100px;line-height:1.8}
+    footer{color:var(--muted);font-size:12px;text-align:center;padding:25px 0}
+    @media(max-width:760px){.shell{padding:13px}.span8,.span4{grid-column:span 12}.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{padding:19px}.panel{padding:15px}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand"><div class="logo">MR</div><div><h1>Movie Recap AI Studio</h1><div class="sub">မြန်မာ Movie Recap • Script • Creator Dashboard</div></div></div>
+    <div class="pill" id="connectionPill">Backend: မစစ်ဆေးရသေးပါ</div>
+  </header>
+
+  <section class="hero">
+    <h2>သင့်ရဲ့ AI Video Creator Studio</h2>
+    <p>Movie recap အတွက် video တင်ခြင်း၊ processing အခြေအနေစစ်ခြင်း၊ ဇာတ်ညွှန်းရေးသားခြင်းနဲ့ ဘာသာပြန်ခြင်းတို့ကို တစ်နေရာတည်းမှာ စီမံနိုင်ဖို့ Dashboard အခြေခံဗားရှင်းပါ။</p>
+    <div class="actions"><button class="btn" onclick="checkBackend()">Backend စစ်ဆေးမယ်</button><button class="btn secondary" onclick="showTool('recap')">Movie Recap စမယ်</button></div>
+  </section>
+
+  <div class="tiles">
+    <div class="tile"><strong>01</strong><span>Movie Recap Upload</span></div>
+    <div class="tile"><strong>02</strong><span>Job Status Tracking</span></div>
+    <div class="tile"><strong>03</strong><span>Script Writer</span></div>
+    <div class="tile"><strong>04</strong><span>Translate / Rewrite</span></div>
+  </div>
+
+  <nav class="toolnav" aria-label="Tools">
+    <button class="active" data-tool="recap" onclick="showTool('recap')">🎬 Movie Recap</button>
+    <button data-tool="script" onclick="showTool('script')">✍️ Script Writer</button>
+    <button data-tool="translate" onclick="showTool('translate')">🌐 Translate</button>
+    <button data-tool="about" onclick="showTool('about')">⚙️ Settings / API</button>
+  </nav>
+
+  <main class="grid">
+    <section class="panel span8" id="tool-recap">
+      <h3>🎬 Movie Recap Generator</h3>
+      <div class="field"><label for="backendUrl">Backend URL (Render URL ထည့်ပါ)</label><input id="backendUrl" type="url" placeholder="https://your-service.onrender.com" value="https://movie-recap-ai-smfn.onrender.com"><div class="small">URL အဆုံးမှာ / မထည့်လည်း ရပါတယ်။</div></div>
+      <div class="field"><label for="videoFile">Video ဖိုင်ရွေးပါ (MP4 / MOV / MKV / WEBM, အများဆုံး 100 MB)</label><input id="videoFile" type="file" accept=".mp4,.mov,.mkv,.webm,video/mp4,video/quicktime,video/webm,video/x-matroska"></div>
+      <div class="actions"><button class="btn" id="uploadBtn" onclick="uploadVideo()">Video တင်ပြီး Recap စမယ်</button><button class="btn secondary" onclick="checkBackend()">Backend စစ်မယ်</button></div>
+      <div class="status" id="recapStatus">Video တင်ပြီးနောက် Job ID ကို သိမ်းထားပါ။ Backend က task ကို queue ထဲ ပို့ပေးပါမယ်။</div>
+      <div class="field" style="margin-top:16px"><label for="jobId">Job ID</label><input id="jobId" type="text" placeholder="Upload ပြီးရင် Job ID ဒီမှာပေါ်လာပါမယ်"></div>
+      <div class="actions"><button class="btn green" onclick="checkJob()">Processing အခြေအနေစစ်မယ်</button></div>
+      <div class="status" id="jobStatus">Job အခြေအနေ မစစ်ရသေးပါ။</div>
+      <p class="small">မှတ်ချက်: ဒီ Dashboard က သင့် FastAPI API ရှိပြီးသား endpoint တွေကိုပဲ ခေါ်ပါတယ်။ Recap ထုတ်လုပ်မှုအတွက် Celery worker နဲ့ AI processing ကို သီးခြားအလုပ်လုပ်နေဖို့ လိုပါတယ်။</p>
+    </section>
+
+    <section class="panel span4" id="tool-script">
+      <h3>✍️ Script Writer</h3>
+      <div class="field"><label for="scriptType">ပုံစံရွေးပါ</label><select id="scriptType"><option>မြန်မာ Movie Recap</option><option>Storytelling</option><option>Gen-Z</option><option>Documentary</option><option>Fast Recap</option><option>News Style</option></select></div>
+      <div class="field"><label for="scriptIdea">ဇာတ်လမ်းအကြောင်း / အချက်အလက်</label><textarea id="scriptIdea" placeholder="ဥပမာ - လူငယ်တစ်ယောက်က လျှို့ဝှက်မြို့တစ်မြို့ကို ရောက်သွားတယ်..."></textarea></div>
+      <div class="actions"><button class="btn" onclick="generateScript()">Prompt ဖန်တီးမယ်</button></div>
+      <div class="field" style="margin-top:14px"><label>Copy လုပ်ရန် Prompt</label><div class="output" id="scriptOutput">အကြောင်းအရာထည့်ပြီး Prompt ဖန်တီးပါ။</div></div>
+      <button class="btn secondary" onclick="copyText('scriptOutput')">Prompt Copy</button>
+      <p class="small">ဒီအပိုင်းက Prompt ကို စက်ထဲမှာ ဖန်တီးပေးတာဖြစ်ပြီး AI ကို တိုက်ရိုက်ခေါ်ဖို့ API ချိတ်ဆက်မှု မပါသေးပါ။</p>
+    </section>
+
+    <section class="panel span12" id="tool-translate">
+      <h3>🌐 Translate / Rewrite</h3>
+      <div class="grid">
+        <div class="field span8"><label for="translateText">ပြောင်းလဲ / ဘာသာပြန်လိုသော စာသား</label><textarea id="translateText" placeholder="ဒီနေရာမှာ စာသားထည့်ပါ..."></textarea></div>
+        <div class="field span4"><label for="translateMode">လုပ်ဆောင်ချက်</label><select id="translateMode"><option>မြန်မာဘာသာသို့ ဘာသာပြန်ရန်</option><option>English သို့ ဘာသာပြန်ရန်</option><option>မြန်မာစာကို သဘာဝကျအောင် ပြန်ရေးရန်</option><option>Movie Recap အသံဖတ်ရန် သင့်တော်အောင် ပြင်ရန်</option></select></div>
+      </div>
+      <div class="actions"><button class="btn" onclick="makeTranslatePrompt()">Prompt ဖန်တီးမယ်</button><button class="btn secondary" onclick="copyText('translateOutput')">Copy</button></div>
+      <div class="field" style="margin-top:14px"><label>Prompt Output</label><div class="output" id="translateOutput">စာသားထည့်ပြီး Prompt ဖန်တီးပါ။</div></div>
+      <p class="small">ဘာသာပြန်ရလဒ်ကို တကယ်ထုတ်ပေးဖို့ AI API ချိတ်ဆက်မှု ထပ်လိုပါတယ်။ API key ကို HTML ထဲ တိုက်ရိုက်မထည့်ပါနဲ့။</p>
+    </section>
+
+    <section class="panel span12 hidden" id="tool-about">
+      <h3>⚙️ Settings / API</h3>
+      <div class="notice">Backend URL ကို Movie Recap အပိုင်းမှာ ပြင်နိုင်ပါတယ်။ လုံခြုံရေးအတွက် Groq / Gemini API key များကို HTML ထဲ မထည့်ပါနှင့်။ API key ကို Backend Environment Variables ထဲမှာသာ ထည့်သင့်ပါတယ်။</div>
+      <p class="small">လက်ရှိ Backend endpoints: GET /, GET /health, POST /api/recap, GET /api/status/{job_id}</p>
+      <button class="btn secondary" onclick="checkBackend()">Backend Connection စစ်မယ်</button>
+    </section>
+  </main>
+  <footer>Movie Recap AI Studio • Dashboard Preview • API keys are not stored in this page.</footer>
+</div>
+
+<script>
+const toolIds = ['recap','script','translate','about'];
+function baseUrl(){return document.getElementById('backendUrl').value.trim().replace(/\/+$/,'');}
+function showTool(tool){
+  toolIds.forEach(id=>document.getElementById('tool-'+id).classList.toggle('hidden',id!==tool));
+  document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===tool));
+}
+function setStatus(id,message,type=''){
+  const el=document.getElementById(id);el.textContent=message;el.className='status'+(type?' '+type:'');
+}
+async function checkBackend(){
+  const pill=document.getElementById('connectionPill');
+  pill.textContent='Backend: စစ်ဆေးနေသည်...';
+  try{
+    const r=await fetch(baseUrl()+'/health',{method:'GET'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    pill.textContent='Backend: '+(d.status==='ok'?'ချိတ်ဆက်ထားသည်':'ပြန်စစ်ရန်လို');
+    setStatus('recapStatus','Backend ချိတ်ဆက်မှု အောင်မြင်ပါတယ်။ '+JSON.stringify(d),'ok');
+  }catch(e){
+    pill.textContent='Backend: မချိတ်ဆက်နိုင်';
+    setStatus('recapStatus','Backend ကို မချိတ်ဆက်နိုင်ပါ။ URL ကိုစစ်ပါ။ Render service က sleep/wake လုပ်နေခြင်း သို့မဟုတ် browser CORS ကန့်သတ်ချက် ဖြစ်နိုင်ပါတယ်။ အသေးစိတ်: '+e.message,'bad');
+  }
+}
+async function uploadVideo(){
+  const file=document.getElementById('videoFile').files[0];
+  if(!file){setStatus('recapStatus','အရင်ဆုံး Video ဖိုင်တစ်ခု ရွေးပါ။','bad');return;}
+  const allowed=['.mp4','.mov','.mkv','.webm'];
+  const ext='.'+(file.name.split('.').pop()||'').toLowerCase();
+  if(!allowed.includes(ext)){setStatus('recapStatus','MP4, MOV, MKV, WEBM ဖိုင်ကိုသာ တင်နိုင်ပါတယ်။','bad');return;}
+  if(file.size>100*1024*1024){setStatus('recapStatus','Video ဖိုင်က 100 MB ထက်ကြီးနေပါတယ်။ ပိုသေးတဲ့ဖိုင်ရွေးပါ။','bad');return;}
+  const btn=document.getElementById('uploadBtn');btn.disabled=true;btn.textContent='တင်နေသည်...';
+  try{
+    const form=new FormData();form.append('video',file);
+    const r=await fetch(baseUrl()+'/api/recap',{method:'POST',body:form});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.detail||('HTTP '+r.status));
+    document.getElementById('jobId').value=d.job_id||'';
+    setStatus('recapStatus','Video လက်ခံပြီးပါပြီ။ Status: '+d.status+'\nJob ID: '+d.job_id+'\n'+(d.message||''),'ok');
+  }catch(e){setStatus('recapStatus','Video တင်မအောင်မြင်ပါ။ '+e.message+'\nBackend / worker / network ကို စစ်ပါ။','bad');}
+  finally{btn.disabled=false;btn.textContent='Video တင်ပြီး Recap စမယ်';}
+}
+async function checkJob(){
+  const id=document.getElementById('jobId').value.trim();
+  if(!id){setStatus('jobStatus','Job ID ထည့်ပါ သို့မဟုတ် Video ကို အရင်တင်ပါ။','bad');return;}
+  try{
+    const r=await fetch(baseUrl()+'/api/status/'+encodeURIComponent(id));
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.detail||('HTTP '+r.status));
+    setStatus('jobStatus',JSON.stringify(d,null,2),d.status==='SUCCESS'?'ok':'');
+  }catch(e){setStatus('jobStatus','Status မစစ်နိုင်ပါ။ '+e.message,'bad');}
+}
+function generateScript(){
+  const type=document.getElementById('scriptType').value;
+  const idea=document.getElementById('scriptIdea').value.trim();
+  if(!idea){document.getElementById('scriptOutput').textContent='အရင်ဆုံး ဇာတ်လမ်းအကြောင်းအရာ ထည့်ပါ။';return;}
+  document.getElementById('scriptOutput').textContent=`သင်သည် ကျွမ်းကျင်သော မြန်မာ Movie Recap Script Writer ဖြစ်သည်။\nပုံစံ: ${type}\n\nအောက်ပါအကြောင်းအရာကို အခြေခံပြီး မြန်မာစကားပြောသဘာဝကျသော ဇာတ်ညွှန်းရေးပါ။\n- စတင်ချိန်တွင် စိတ်ဝင်စားစေသော Hook ထည့်ပါ။\n- ဇာတ်လမ်းအစဉ်လိုက်ကို ရှင်းလင်းစွာဖော်ပြပါ။\n- ထပ်ခါထပ်ခါမရေးဘဲ အသံဖတ်ရန်လွယ်ကူစေပါ။\n- မသိသော အချက်အလက်များကို မတီထွင်ပါနှင့်။\n- အဆုံးတွင် သင့်တော်သော စိတ်ဝင်စားဖွယ်အဆုံးသတ် ထည့်ပါ။\n\nအကြောင်းအရာ:\n${idea}`;
+}
+function makeTranslatePrompt(){
+  const input=document.getElementById('translateText').value.trim();
+  const mode=document.getElementById('translateMode').value;
+  document.getElementById('translateOutput').textContent=input?`အောက်ပါစာသားကို ${mode}။ မူရင်းအဓိပ္ပာယ်၊ အမည်များနှင့် အချက်အလက်များကို ထိန်းထားပြီး သဘာဝကျအောင်လုပ်ပါ။\n\nစာသား:\n${input}`:'အရင်ဆုံး စာသားထည့်ပါ။';
+}
+async function copyText(id){
+  const text=document.getElementById(id).textContent;
+  try{await navigator.clipboard.writeText(text);alert('Copy လုပ်ပြီးပါပြီ။');}
+  catch(e){const area=document.createElement('textarea');area.value=text;document.body.appendChild(area);area.select();document.execCommand('copy');area.remove();alert('Copy လုပ်ပြီးပါပြီ။');}
+}
+checkBackend();
+</script>
+</body>
+</html>
