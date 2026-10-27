@@ -226,6 +226,97 @@ def home():
 def health():
     return {"status": "ok", "service": "movie-recap-ai"}
 
+@app.post("/api/tts")
+async def create_tts(payload: dict):
+    text = str(payload.get("text", "")).strip()
+    voice = str(payload.get("voice", "Kore")).strip()
+    style = str(
+        payload.get("style", "Natural Burmese movie recap narration")
+    ).strip()
+
+    if not text:
+        raise HTTPException(
+            status_code=400,
+            detail="အသံပြောင်းရန် စာသားထည့်ပါ။"
+        )
+
+    if len(text) > 8000:
+        raise HTTPException(
+            status_code=400,
+            detail="စာသားသည် 8000 characters ထက် မကျော်ရပါ။"
+        )
+
+    api_key = os.getenv("GEMINI_API_KEY", "").strip()
+    if not api_key:
+        raise HTTPException(
+            status_code=500,
+            detail="Render Environment မှာ GEMINI_API_KEY ထည့်ပါ။"
+        )
+
+    try:
+        client = genai.Client(api_key=api_key)
+
+        interaction = client.interactions.create(
+            model="gemini-3.8-flash-tts",
+            input=[{
+                "type": "user_input",
+                "content": [{
+                    "type": "text",
+                    "text": text,
+                    "annotations": [{
+                        "type": "speech_metadata",
+                        "style": style
+                    }]
+                }]
+            }],
+            response_format={"type": "audio"},
+            generation_config={
+                "speech_config": [{"voice": voice}]
+            }
+        )
+
+        audio_data = interaction.output_audio.data
+        if not audio_data:
+            raise RuntimeError("Gemini မှ အသံဒေတာမရရှိပါ။")
+
+        wav_bytes = base64.b64decode(audio_data)
+
+        # WAV ကို FFmpeg ဖြင့် MP3 ပြောင်းပါ။
+        result = subprocess.run(
+            [
+                "ffmpeg", "-y",
+                "-i", "pipe:0",
+                "-codec:a", "libmp3lame",
+                "-b:a", "128k",
+                "-f", "mp3",
+                "pipe:1"
+            ],
+            input=wav_bytes,
+            capture_output=True,
+            timeout=120
+        )
+
+        if result.returncode != 0 or not result.stdout:
+            raise RuntimeError("WAV မှ MP3 ပြောင်းမရပါ။")
+
+        return StreamingResponse(
+            io.BytesIO(result.stdout),
+            media_type="audio/mpeg",
+            headers={
+                "Content-Disposition":
+                    'attachment; filename="movie-recap-voiceover.mp3"',
+                "Cache-Control": "no-store"
+            }
+        )
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        print("Gemini TTS error:", repr(exc))
+        raise HTTPException(
+            status_code=502,
+            detail=f"အသံထုတ်မရပါ။ {str(exc)[:500]}"
+        )
 
 @app.post("/api/recap")
 async def start_recap(
