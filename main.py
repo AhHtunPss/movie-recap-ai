@@ -108,7 +108,7 @@ def create_summary(transcript, mode="Storytelling"):
         json={
             "model": os.getenv(
                 "GROQ_TEXT_MODEL",
-                "llama-3.3-70b-versatile"
+                "openai/gpt-oss-120b"
             ),
             "messages": [
                 {
