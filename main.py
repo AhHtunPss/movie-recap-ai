@@ -231,7 +231,10 @@ async def create_tts(payload: dict):
     text = str(payload.get("text", "")).strip()
     voice = str(payload.get("voice", "Kore")).strip()
     style = str(
-        payload.get("style", "Natural Burmese movie recap narration")
+        payload.get(
+            "style",
+            "Natural, clear Burmese movie recap narration"
+        )
     ).strip()
 
     if not text:
@@ -245,6 +248,12 @@ async def create_tts(payload: dict):
             status_code=400,
             detail="စာသားသည် 8000 characters ထက် မကျော်ရပါ။"
         )
+
+    allowed_voices = {
+        "Kore", "Aoede", "Charon", "Sulafat"
+    }
+    if voice not in allowed_voices:
+        voice = "Kore"
 
     api_key = os.getenv("GEMINI_API_KEY", "").strip()
     if not api_key:
@@ -271,7 +280,9 @@ async def create_tts(payload: dict):
             }],
             response_format={"type": "audio"},
             generation_config={
-                "speech_config": [{"voice": voice}]
+                "speech_config": [
+                    {"voice": voice}
+                ]
             }
         )
 
@@ -279,13 +290,15 @@ async def create_tts(payload: dict):
         if not audio_data:
             raise RuntimeError("Gemini မှ အသံဒေတာမရရှိပါ။")
 
+        # Gemini က base64 encoded WAV ပြန်ပေးသည့်အတွက် decode လုပ်ပါ။
         wav_bytes = base64.b64decode(audio_data)
 
-        # WAV ကို FFmpeg ဖြင့် MP3 ပြောင်းပါ။
+        # WAV ဖိုင်ကို MP3 ပြောင်းပါ။
         result = subprocess.run(
             [
                 "ffmpeg", "-y",
                 "-i", "pipe:0",
+                "-vn",
                 "-codec:a", "libmp3lame",
                 "-b:a", "128k",
                 "-f", "mp3",
@@ -293,11 +306,16 @@ async def create_tts(payload: dict):
             ],
             input=wav_bytes,
             capture_output=True,
-            timeout=120
+            timeout=180
         )
 
         if result.returncode != 0 or not result.stdout:
-            raise RuntimeError("WAV မှ MP3 ပြောင်းမရပါ။")
+            error = result.stderr.decode(
+                "utf-8", errors="replace"
+            )[-1000:]
+            raise RuntimeError(
+                "WAV မှ MP3 ပြောင်းမရပါ။ " + error
+            )
 
         return StreamingResponse(
             io.BytesIO(result.stdout),
@@ -315,7 +333,8 @@ async def create_tts(payload: dict):
         print("Gemini TTS error:", repr(exc))
         raise HTTPException(
             status_code=502,
-            detail=f"အသံထုတ်မရပါ။ {str(exc)[:500]}"
+            detail="Gemini အသံထုတ်ရာတွင် အမှားဖြစ်နေပါသည်: "
+                   + str(exc)[:400]
         )
 
 @app.post("/api/recap")
