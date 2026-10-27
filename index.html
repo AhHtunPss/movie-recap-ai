@@ -99,7 +99,39 @@
       <div class="field" style="margin-top:14px"><label>Prompt Output</label><div class="output" id="translateOutput">စာသားထည့်ပြီး Prompt ဖန်တီးပါ။</div></div>
       <p class="small">ဘာသာပြန်ရလဒ်ကို တကယ်ထုတ်ပေးဖို့ AI API ချိတ်ဆက်မှု ထပ်လိုပါတယ်။ API key ကို HTML ထဲ တိုက်ရိုက်မထည့်ပါနဲ့။</p>
     </section>
+    <section class="panel span12" id="tool-voiceover">
+  <h3>🎙️ Gemini မြန်မာ AI Voiceover</h3>
 
+  <div class="field">
+    <label for="voiceoverText">အသံထုတ်လိုသော မြန်မာစာသား</label>
+    <textarea id="voiceoverText" placeholder="Movie Recap Voiceover Script ကို ဒီမှာထည့်ပါ"></textarea>
+  </div>
+
+  <div class="field">
+    <label for="ttsVoice">အသံပုံစံ ရွေးပါ</label>
+    <select id="ttsVoice">
+      <option value="Kore">Kore — ပြတ်သားသောအသံ</option>
+      <option value="Aoede">Aoede — ပေါ့ပါးသောအသံ</option>
+      <option value="Charon">Charon — ဇာတ်ကြောင်းပြောသံ</option>
+      <option value="Sulafat">Sulafat — နွေးထွေးသောအသံ</option>
+    </select>
+  </div>
+
+  <button class="btn green" id="makeVoiceBtn" onclick="makeMovieVoice()">
+    🎧 MP3 အသံထုတ်မယ်
+  </button>
+
+  <div class="status" id="voiceStatus">စာသားထည့်ပြီး MP3 အသံထုတ်နိုင်ပါပြီ။</div>
+
+  <div class="field" style="margin-top:14px">
+    <audio id="voicePlayer" controls style="width:100%;display:none"></audio>
+  </div>
+
+  <a id="voiceDownload" class="btn secondary"
+     style="display:none;text-decoration:none"
+     download="movie-recap-voiceover.mp3">⬇️ MP3 ဒေါင်းလုဒ်လုပ်မယ်</a>
+    </section>
+    
     <section class="panel span12 hidden" id="tool-about">
       <h3>⚙️ Settings / API</h3>
       <div class="notice">Backend URL ကို Movie Recap အပိုင်းမှာ ပြင်နိုင်ပါတယ်။ လုံခြုံရေးအတွက် Groq / Gemini API key များကို HTML ထဲ မထည့်ပါနှင့်။ API key ကို Backend Environment Variables ထဲမှာသာ ထည့်သင့်ပါတယ်။</div>
@@ -179,6 +211,80 @@ async function copyText(id){
   catch(e){const area=document.createElement('textarea');area.value=text;document.body.appendChild(area);area.select();document.execCommand('copy');area.remove();alert('Copy လုပ်ပြီးပါပြီ။');}
 }
 checkBackend();
+  let movieVoiceUrl = null;
+
+async function makeMovieVoice() {
+  const text = document.getElementById("voiceoverText").value.trim();
+  const voice = document.getElementById("ttsVoice").value;
+  const status = document.getElementById("voiceStatus");
+  const button = document.getElementById("makeVoiceBtn");
+  const player = document.getElementById("voicePlayer");
+  const download = document.getElementById("voiceDownload");
+
+  if (!text) {
+    status.textContent = "အသံထုတ်ရန် မြန်မာစာသား အရင်ထည့်ပါ။";
+    status.className = "status bad";
+    return;
+  }
+
+  if (text.length > 8000) {
+    status.textContent = "စာသားရှည်လွန်းနေပါတယ်။ စာလုံးရေ 8000 အောက်ထားပါ။";
+    status.className = "status bad";
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "အသံထုတ်နေသည်...";
+  status.textContent = "Gemini AI က အသံဖိုင်ဖန်တီးနေပါတယ်။ ခဏစောင့်ပါ။";
+  status.className = "status";
+
+  try {
+    const response = await fetch(baseUrl() + "/api/tts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        text: text,
+        voice: voice
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "HTTP " + response.status);
+    }
+
+    const blob = await response.blob();
+
+    if (!blob.size) {
+      throw new Error("အသံဖိုင်အလွတ်ဖြစ်နေပါတယ်။");
+    }
+
+    if (movieVoiceUrl) {
+      URL.revokeObjectURL(movieVoiceUrl);
+    }
+
+    movieVoiceUrl = URL.createObjectURL(blob);
+    player.src = movieVoiceUrl;
+    player.style.display = "block";
+
+    download.href = movieVoiceUrl;
+    download.style.display = "inline-block";
+
+    status.textContent = "အသံဖိုင် အဆင်သင့်ဖြစ်ပါပြီ။ နားထောင်နိုင်ပါပြီ။";
+    status.className = "status ok";
+
+  } catch (error) {
+    status.textContent =
+      "အသံထုတ်မရပါ။ Backend /api/tts နှင့် Gemini API Key ကို စစ်ပါ။\n" +
+      error.message;
+    status.className = "status bad";
+  } finally {
+    button.disabled = false;
+    button.textContent = "🎧 MP3 အသံထုတ်မယ်";
+  }
+          }
 </script>
 </body>
 </html>
