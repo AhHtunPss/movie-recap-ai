@@ -6,3 +6,4 @@ python-multipart
 python-dotenv
 httpx
 google-genai>=2.25.0
+google-genai
