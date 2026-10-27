@@ -1,4 +1,3 @@
-
 fastapi
 uvicorn[standard]
 celery[redis]
@@ -6,3 +5,4 @@ redis
 python-multipart
 python-dotenv
 httpx
+google-genai>=2.25.0
