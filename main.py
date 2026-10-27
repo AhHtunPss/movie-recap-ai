@@ -3,11 +3,15 @@ import uuid
 import subprocess
 import tempfile
 import threading
+import base64
+import io
 from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from google import genai
+
 
 app = FastAPI(title="Movie Recap AI")
 
